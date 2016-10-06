@@ -51,6 +51,9 @@ public class User implements Serializable {
 	@Column(name = "unread_messages")
 	private int unreadMessages;
 
+	@Column(name = "generated_otp")
+	private long otp;
+
 	public String getUserId() {
 		return userId;
 	}
@@ -135,6 +138,14 @@ public class User implements Serializable {
 
 	public void setUnreadMessages(int unreadMessages) {
 		this.unreadMessages = unreadMessages;
+	}
+
+	public long getOtp() {
+		return otp;
+	}
+
+	public void setOtp(long otp) {
+		this.otp = otp;
 	}
 
 }

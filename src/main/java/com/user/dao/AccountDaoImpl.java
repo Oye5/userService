@@ -17,4 +17,15 @@ public class AccountDaoImpl extends AbstractDao<Long, Accounts> implements Accou
 
 	}
 
+	@Override
+	public int updateAccount(Accounts account) {
+		return updateAccounts(account);
+	}
+
+	@Override
+	public void createAccount(Accounts account) {
+		persist(account);
+
+	}
+
 }
