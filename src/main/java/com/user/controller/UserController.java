@@ -159,8 +159,7 @@ public class UserController {
 		} catch (org.springframework.dao.DataIntegrityViolationException ex) {
 			ex.printStackTrace();
 			response.setCode("V002");
-			response.setMessage(
-					"Email Id or username already used for signup. please try with other Email id and username");
+			response.setMessage("Email Id or username already used for signup. please try with other Email id and username");
 			return new ResponseEntity<GenericResponse>(response, HttpStatus.CONFLICT);
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -406,8 +405,7 @@ public class UserController {
 	 * @return
 	 */
 	@RequestMapping(value = "/v1/{userid}/favorites/products/{productid}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> makeProductAsFavourite(@PathVariable("userid") String userId,
-			@PathVariable("productid") String productId) {
+	public ResponseEntity<?> makeProductAsFavourite(@PathVariable("userid") String userId, @PathVariable("productid") String productId) {
 		GenericResponse response = new GenericResponse();
 		try {
 			FavouriteProducts favouriteProducts = new FavouriteProducts();
@@ -418,8 +416,7 @@ public class UserController {
 			user.setUserId(userId);
 			favouriteProducts.setUserId(user);
 			favouriteProducts.setFavourite(true);
-			List<FavouriteProducts> listFavouriteProducts = favouriteProductService
-					.getFavouriteProducts(favouriteProducts);
+			List<FavouriteProducts> listFavouriteProducts = favouriteProductService.getFavouriteProducts(favouriteProducts);
 			if (listFavouriteProducts.size() == 0) {
 				favouriteProductService.saveFavouriteProduct(favouriteProducts);
 				ProductStatus status = productStatusService.getProductStatus(productId);
@@ -466,16 +463,14 @@ public class UserController {
 
 	// http://52.43.30.248:8080/productapi/v1//{userid}/favourites/products/{productid}
 	@RequestMapping(value = "/v1/{userid}/favorites/products", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> getFavouriteProducts(@PathVariable("userid") String userId,
-			@RequestParam("num_results") Integer numResults) {
+	public ResponseEntity<?> getFavouriteProducts(@PathVariable("userid") String userId, @RequestParam("num_results") Integer numResults) {
 		GenericResponse response = new GenericResponse();
 		try {
 			FavouriteProducts favouriteProducts = new FavouriteProducts();
 			User user = new User();
 			user.setUserId(userId);
 			favouriteProducts.setUserId(user);
-			List<FavouriteProducts> listFavouriteProducts = favouriteProductService
-					.getFavouriteProductsByUserId(favouriteProducts);
+			List<FavouriteProducts> listFavouriteProducts = favouriteProductService.getFavouriteProductsByUserId(favouriteProducts);
 
 			List<ProductResponse> listProductResponse = new ArrayList<ProductResponse>();
 			ProductResponse productResponse = null;
@@ -497,8 +492,7 @@ public class UserController {
 				geoResponse.setZip_code(listFavouriteProducts.get(i).getProductId().getGeo().getZipCode());
 				productResponse.setGeo(geoResponse);
 				productResponse.setProduct_id(listFavouriteProducts.get(i).getProductId().getProductId());
-				List<ProductImages> img = productImageService
-						.getProductImagesByProductId(listFavouriteProducts.get(i).getProductId().getProductId());
+				List<ProductImages> img = productImageService.getProductImagesByProductId(listFavouriteProducts.get(i).getProductId().getProductId());
 				// image
 				List<ProductImageResponse> listImageRes = new ArrayList<ProductImageResponse>();
 				ProductImageResponse imgRes = null;
@@ -509,8 +503,7 @@ public class UserController {
 					listImageRes.add(imgRes);
 				}
 				productResponse.setImages(listImageRes);
-				ThumbNail thumbNail = thumbNailService
-						.getThumbByProductId(listFavouriteProducts.get(i).getProductId().getProductId());
+				ThumbNail thumbNail = thumbNailService.getThumbByProductId(listFavouriteProducts.get(i).getProductId().getProductId());
 				ThumbResponse thumb = null;
 				if (thumbNail != null) {
 					thumb = new ThumbResponse();
@@ -524,8 +517,7 @@ public class UserController {
 				productResponse.setDisplay_name(listFavouriteProducts.get(i).getProductId().getDisplayName());
 				// owner
 				SellerResponse sellerResponse = new SellerResponse();
-				Seller seller = sellerService
-						.getSellerById(listFavouriteProducts.get(i).getProductId().getUser().getUserId());
+				Seller seller = sellerService.getSellerById(listFavouriteProducts.get(i).getProductId().getUser().getUserId());
 				if (seller != null) {
 					sellerResponse.setProfile_pic_url(seller.getProfilePic());
 					sellerResponse.setBanned(seller.getBanned());
@@ -565,8 +557,7 @@ public class UserController {
 	 * @return
 	 */
 	@RequestMapping(value = "/v1/{userid}/unfavorites/products/{productid}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> makeProductAsUnFavourite(@PathVariable("userid") String userId,
-			@PathVariable("productid") String productId) {
+	public ResponseEntity<?> makeProductAsUnFavourite(@PathVariable("userid") String userId, @PathVariable("productid") String productId) {
 		GenericResponse response = new GenericResponse();
 		try {
 			int res = favouriteProductService.deleteFavouriteProductByUserId(userId, productId);
@@ -607,9 +598,7 @@ public class UserController {
 	public String folder;// = "user";
 
 	@RequestMapping(value = "/v1/updateUser/{userid}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> updateUserProfile(@PathVariable("userid") String userId,
-			@RequestParam(value = "image", required = false) MultipartFile file,
-			UpdateUserProfileRequest userProfileRequest) {
+	public ResponseEntity<?> updateUserProfile(@PathVariable("userid") String userId, @RequestParam(value = "image", required = false) MultipartFile file, UpdateUserProfileRequest userProfileRequest) {
 		GenericResponse response = new GenericResponse();
 		try {
 			User user = userService.getUserById(userId);
@@ -720,8 +709,7 @@ public class UserController {
 	 */
 
 	@RequestMapping(value = "/v1/product/{productId}/buyer/{buyerid}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> buyProduct(@PathVariable("productId") String productId,
-			@PathVariable("buyerid") String buyerId) {
+	public ResponseEntity<?> buyProduct(@PathVariable("productId") String productId, @PathVariable("buyerid") String buyerId) {
 		GenericResponse response = new GenericResponse();
 		try {
 			List<Product> productList = productService.getProductByProductId(productId);
@@ -767,8 +755,7 @@ public class UserController {
 			GeoPoint gp = new GeoPoint(product.getGeo().getLattitude(), product.getGeo().getLongitude());
 			product.setLocation(gp);
 			JestClient client = ElasticUtil.getClient();
-			Index index = new Index.Builder(product).index("product").type("Product")
-					.id(product.getProductId().toString()).build();
+			Index index = new Index.Builder(product).index("product").type("Product").id(product.getProductId().toString()).build();
 			client.execute(index);
 
 			return new ResponseEntity<ProductTransactionResponse>(transactionResponse, HttpStatus.OK);
@@ -792,7 +779,6 @@ public class UserController {
 		GenericResponse response = new GenericResponse();
 		try {
 			User user = userService.getUserByEmailId(userEmail);
-			System.out.println("-user====" + user);
 			if (user == null) {
 				response.setMessage("user with given email Id does not exist");
 				response.setCode("V001");
@@ -803,18 +789,17 @@ public class UserController {
 			HtmlEmail email = new HtmlEmail();
 			// Email email = new SimpleEmail();
 			email.setHostName("smtp.googlemail.com");
-			email.setAuthentication("nitesh@gmail.com", "nitesh");
+			email.setAuthentication("sksnitesh@gmail.com", "1234");
 			email.setDebug(true);
 			email.setSSL(true);
 			email.setSmtpPort(587);
 
 			email.addTo(user.getEmail().toString());
-			email.setFrom("nitesh", "nitesh");
+			email.setFrom("nitesh@gmail.com", "nitesh");
 			email.setSubject("Test message");
-			email.setMsg("Hi  ,This is a mailregarding creating your user name and password please click"
-					+ "on the below link to generate your username and password\n" + user.getOtp());
+			email.setMsg("Hi  ,This is a mailregarding creating your user name and password please click" + "on the below link to generate your username and password\n" + user.getOtp());
 			email.setDebug(true);
-			System.out.println("---" + email.getSmtpPort());
+			//System.out.println("---" + email.getSmtpPort());
 			email.send();
 			// return "mail sent to user";
 			userService.updateUser(user);
