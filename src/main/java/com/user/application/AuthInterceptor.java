@@ -21,8 +21,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 	private AccountService accountService;
 
 	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-			throws Exception {
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 		HttpServletRequest httpRequest = request;
 		HashMap<String, String> multivaluedMap = getHeaders(httpRequest);
 		String authId = null;
@@ -35,6 +34,10 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 		} else if (httpRequest.getRequestURI().contains("/userservice/user/signup")) {
 			return true;
 		} else if (httpRequest.getRequestURI().contains("/userservice/user/signin")) {
+			return true;
+		} else if (httpRequest.getRequestURI().contains("/userservice/v1/user/forgetpassword")) {
+			return true;
+		} else if (httpRequest.getRequestURI().contains("/userservice/v1/user/resetpassword")) {
 			return true;
 		} else {
 			Accounts account = accountService.getAccountByAuthToken(authId);
@@ -49,14 +52,12 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 	}
 
 	@Override
-	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-			ModelAndView modelAndView) throws Exception {
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
 
 	}
 
 	@Override
-	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
-			throws Exception {
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
 
 	}
 

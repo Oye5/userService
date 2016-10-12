@@ -1,5 +1,8 @@
 package com.user.controller;
 
+import io.searchbox.client.JestClient;
+import io.searchbox.core.Index;
+
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Date;
@@ -7,7 +10,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-import org.apache.commons.mail.HtmlEmail;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -24,10 +26,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.restfb.DefaultFacebookClient;
-import com.restfb.FacebookClient;
-import com.restfb.Parameter;
-import com.restfb.Version;
+import com.sendgrid.Content;
+import com.sendgrid.Email;
+import com.sendgrid.Mail;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
 import com.user.dto.request.ResetPasswordRequest;
 import com.user.dto.request.UpdateUserProfileRequest;
 import com.user.dto.request.UserLoginRequest;
@@ -62,9 +67,6 @@ import com.user.service.UserService;
 import com.user.util.ElasticUtil;
 import com.user.util.SetProductResponse;
 import com.user.util.UploadImage;
-
-import io.searchbox.client.JestClient;
-import io.searchbox.core.Index;
 
 @RestController
 public class UserController {
@@ -130,7 +132,7 @@ public class UserController {
 			Accounts account = new Accounts();
 
 			user.setAppType(userSignupRequest.getAppType());
-
+			user.setCreation_date(new Date());
 			user.setEmail(userSignupRequest.getEmail());
 			user.setPassword(userSignupRequest.getPassword());
 			user.setUserName(userSignupRequest.getUsername());
@@ -772,7 +774,14 @@ public class UserController {
 		}
 	}
 
-	// send mail
+	/**
+	 * send email through sendgrid to user
+	 * 
+	 * @param userEmail
+	 * @return
+	 */
+	@Value("${sendgrid.api.key}")
+	public String sendgridApiKey;
 
 	@RequestMapping(value = "/v1/user/forgetpassword", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> forgetPassword(@RequestParam("user_email") String userEmail) {
@@ -786,31 +795,28 @@ public class UserController {
 			}
 			Random random = new Random();
 			user.setOtp(random.nextInt(999999));
-			HtmlEmail email = new HtmlEmail();
-			// Email email = new SimpleEmail();
-			email.setHostName("smtp.googlemail.com");
-			email.setAuthentication("sksnitesh@gmail.com", "1234");
-			email.setDebug(true);
-			email.setSSL(true);
-			email.setSmtpPort(587);
+			// prepare mail to send through sendgrid api
+			Email from = new Email("oye5@oye5.com");
+			String subject = "forget password";
+			Email to = new Email(user.getEmail().toString());
+			Content content = new Content("text/plain", "This is a mail regarding reset your password. please find your OTP Code:  " + user.getOtp());
+			Mail mail = new Mail(from, subject, to, content);
+			SendGrid sg = new SendGrid(sendgridApiKey);
+			Request request = new Request();
 
-			email.addTo(user.getEmail().toString());
-			email.setFrom("nitesh@gmail.com", "nitesh");
-			email.setSubject("Test message");
-			email.setMsg("Hi  ,This is a mailregarding creating your user name and password please click" + "on the below link to generate your username and password\n" + user.getOtp());
-			email.setDebug(true);
-			//System.out.println("---" + email.getSmtpPort());
-			email.send();
-			// return "mail sent to user";
+			request.method = Method.POST;
+			request.endpoint = "mail/send";
+			request.body = mail.build();
+			Response res = sg.api(request);
+			System.out.println(res.statusCode);
+			System.out.println(res.body);
+			System.out.println(res.headers);
+
 			userService.updateUser(user);
 
 			response.setMessage("mail send to user");
 			response.setCode("S001");
 			return new ResponseEntity<GenericResponse>(response, HttpStatus.OK);
-		} catch (org.apache.commons.mail.EmailException e) {
-			response.setMessage("Error while sending mail to given email id: " + e.getMessage());
-			response.setCode("E001");
-			return new ResponseEntity<GenericResponse>(response, HttpStatus.EXPECTATION_FAILED);
 		} catch (Exception e) {
 			response.setMessage(e.getMessage());
 			response.setCode("E002");
@@ -819,6 +825,12 @@ public class UserController {
 		}
 	}
 
+	/**
+	 * reset password
+	 * 
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(value = "/v1/user/resetpassword", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
 		GenericResponse response = new GenericResponse();
@@ -827,6 +839,7 @@ public class UserController {
 			if (user == null) {
 				response.setCode("V001");
 				response.setMessage("email id and otp code not matched. please check");
+				return new ResponseEntity<GenericResponse>(response, HttpStatus.EXPECTATION_FAILED);
 			}
 
 			user.setPassword(request.getPassword());

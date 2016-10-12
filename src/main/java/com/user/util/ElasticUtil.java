@@ -16,7 +16,7 @@ public class ElasticUtil {
 		if (client == null) {
 			// Creating Elastic Client
 			JestClientFactory factory = new JestClientFactory();
-			factory.setHttpClientConfig(new HttpClientConfig.Builder("http://localhost:9200").multiThreaded(true).build());
+			factory.setHttpClientConfig(new HttpClientConfig.Builder("http://52.43.30.248:9200").multiThreaded(true).build());
 			client = factory.getObject();
 		}
 		return client;
