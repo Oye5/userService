@@ -64,6 +64,9 @@ public class Seller implements Serializable {
 	@Column(name = "status")
 	private String status;
 
+	@Column(name = "user_rating")
+	private double userRating;
+
 	public User getUserId() {
 		return userId;
 	}
@@ -150,6 +153,14 @@ public class Seller implements Serializable {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public double getUserRating() {
+		return userRating;
+	}
+
+	public void setUserRating(double userRating) {
+		this.userRating = userRating;
 	}
 
 }

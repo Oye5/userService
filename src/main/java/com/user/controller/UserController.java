@@ -667,6 +667,7 @@ public class UserController {
 				userResponse.setProfile_pic_url(seller.getProfilePic());
 				userResponse.setStatus(seller.getStatus());
 				userResponse.setZip_code(seller.getZipCode());
+				userResponse.setUserRating(seller.getUserRating());
 			}
 
 			userResponse.setEmail(user.getEmail());
@@ -846,6 +847,49 @@ public class UserController {
 			userService.updateUser(user);
 			response.setCode("S001");
 			response.setMessage("password has been changed sucessfully");
+			return new ResponseEntity<GenericResponse>(response, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.setCode("E001");
+			response.setMessage(e.getMessage());
+			return new ResponseEntity<GenericResponse>(response, HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	/**
+	 * user rating api
+	 * 
+	 * @param userId
+	 * @param rarting
+	 * @return
+	 */
+
+	@RequestMapping(value = "/v1/user/rating/{userid}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> userRating(@PathVariable("userid") String userId, @RequestParam("rating") Double rating) {
+		GenericResponse response = new GenericResponse();
+		try {
+			if (rating < 0 || rating > 5) {
+				response.setCode("V001");
+				response.setMessage("please enter rating in the range of 0-5");
+				return new ResponseEntity<GenericResponse>(response, HttpStatus.EXPECTATION_FAILED);
+			}
+			Seller seller = sellerService.getSellerById(userId);
+
+			if (seller == null) {
+				response.setCode("V002");
+				response.setMessage("User id not valid. please check userId");
+				return new ResponseEntity<GenericResponse>(response, HttpStatus.EXPECTATION_FAILED);
+			}
+			if (seller.getUserRating() == 0) {
+				seller.setUserRating(rating);
+			} else {
+				double calulatedRating = (seller.getUserRating() + rating) / 2;
+				seller.setUserRating(calulatedRating);
+			}
+			sellerService.updateSeller(seller);
+
+			response.setCode("S001");
+			response.setMessage("rating done for given userId");
 			return new ResponseEntity<GenericResponse>(response, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();

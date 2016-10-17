@@ -12,6 +12,7 @@ public class UserResponse {
 	private String zip_code;
 	private String banned;
 	private String status;
+	private Double userRating;
 
 	public String getUser_id() {
 		return user_id;
@@ -99,6 +100,14 @@ public class UserResponse {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public Double getUserRating() {
+		return userRating;
+	}
+
+	public void setUserRating(Double userRating) {
+		this.userRating = userRating;
 	}
 
 }
