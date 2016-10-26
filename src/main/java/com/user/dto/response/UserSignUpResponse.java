@@ -1,6 +1,6 @@
 package com.user.dto.response;
 
-public class UserResponse {
+public class UserSignUpResponse {
 	private String user_id;
 	private String user_name;
 	private String first_name;
@@ -10,11 +10,10 @@ public class UserResponse {
 	private String country_code;
 	private String city;
 	private String zip_code;
-	private String banned;
 	private String status;
 	private Double userRating;
-	private double lattitude;
-	private double longitude;
+	private Double lattitude;
+	private Double longitude;
 
 	public String getUser_id() {
 		return user_id;
@@ -52,12 +51,20 @@ public class UserResponse {
 		return zip_code;
 	}
 
-	public String getBanned() {
-		return banned;
-	}
-
 	public String getStatus() {
 		return status;
+	}
+
+	public Double getUserRating() {
+		return userRating;
+	}
+
+	public Double getLattitude() {
+		return lattitude;
+	}
+
+	public Double getLongitude() {
+		return longitude;
 	}
 
 	public void setUser_id(String user_id) {
@@ -96,35 +103,19 @@ public class UserResponse {
 		this.zip_code = zip_code;
 	}
 
-	public void setBanned(String banned) {
-		this.banned = banned;
-	}
-
 	public void setStatus(String status) {
 		this.status = status;
-	}
-
-	public Double getUserRating() {
-		return userRating;
 	}
 
 	public void setUserRating(Double userRating) {
 		this.userRating = userRating;
 	}
 
-	public double getLattitude() {
-		return lattitude;
-	}
-
-	public double getLongitude() {
-		return longitude;
-	}
-
-	public void setLattitude(double lattitude) {
+	public void setLattitude(Double lattitude) {
 		this.lattitude = lattitude;
 	}
 
-	public void setLongitude(double longitude) {
+	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
 

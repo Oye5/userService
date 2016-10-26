@@ -7,6 +7,8 @@ public class UpdateUserProfileRequest {
 	private String zipCode;
 	private String city;
 	private String countryCode;
+	private double lattitude;
+	private double longitude;
 
 	public String getFirstName() {
 		return firstName;
@@ -46,6 +48,22 @@ public class UpdateUserProfileRequest {
 
 	public void setCountryCode(String countryCode) {
 		this.countryCode = countryCode;
+	}
+
+	public double getLattitude() {
+		return lattitude;
+	}
+
+	public double getLongitude() {
+		return longitude;
+	}
+
+	public void setLattitude(double lattitude) {
+		this.lattitude = lattitude;
+	}
+
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
 	}
 
 }

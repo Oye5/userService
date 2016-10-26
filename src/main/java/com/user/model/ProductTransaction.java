@@ -28,7 +28,11 @@ public class ProductTransaction implements Serializable {
 
 	@OneToOne(cascade = CascadeType.DETACH)
 	@JoinColumn(name = "buyer_user_id")
-	private User userId;
+	private User buyerUserId;
+
+	@OneToOne(cascade = CascadeType.DETACH)
+	@JoinColumn(name = "seller_user_id")
+	private User sellerUserId;
 
 	@Column(name = "created_date")
 	private String createdDate;
@@ -41,8 +45,8 @@ public class ProductTransaction implements Serializable {
 		return product;
 	}
 
-	public User getUserId() {
-		return userId;
+	public User getBuyerUserId() {
+		return buyerUserId;
 	}
 
 	public String getCreatedDate() {
@@ -57,12 +61,20 @@ public class ProductTransaction implements Serializable {
 		this.product = product;
 	}
 
-	public void setUserId(User userId) {
-		this.userId = userId;
+	public void setBuyerUserId(User buyerUserId) {
+		this.buyerUserId = buyerUserId;
 	}
 
 	public void setCreatedDate(String createdDate) {
 		this.createdDate = createdDate;
+	}
+
+	public User getSellerUserId() {
+		return sellerUserId;
+	}
+
+	public void setSellerUserId(User sellerUserId) {
+		this.sellerUserId = sellerUserId;
 	}
 
 }

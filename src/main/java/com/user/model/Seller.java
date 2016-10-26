@@ -67,6 +67,15 @@ public class Seller implements Serializable {
 	@Column(name = "user_rating")
 	private double userRating;
 
+	@Column(name = "lattitude")
+	private double lattitude;
+
+	@Column(name = "longitude")
+	private double longitude;
+
+	@Column(name = "gcm_id")
+	private String gcmId;
+
 	public User getUserId() {
 		return userId;
 	}
@@ -161,6 +170,30 @@ public class Seller implements Serializable {
 
 	public void setUserRating(double userRating) {
 		this.userRating = userRating;
+	}
+
+	public double getLattitude() {
+		return lattitude;
+	}
+
+	public double getLongitude() {
+		return longitude;
+	}
+
+	public void setLattitude(double lattitude) {
+		this.lattitude = lattitude;
+	}
+
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
+
+	public String getGcmId() {
+		return gcmId;
+	}
+
+	public void setGcmId(String gcmId) {
+		this.gcmId = gcmId;
 	}
 
 }

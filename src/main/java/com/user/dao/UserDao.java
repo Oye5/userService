@@ -16,4 +16,6 @@ public interface UserDao {
 	void saveUser(User user);
 
 	User getUser(String email);
+
+	User getUserByAccessToken(String accessToken);
 }

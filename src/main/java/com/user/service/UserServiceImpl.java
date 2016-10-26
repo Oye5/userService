@@ -47,4 +47,9 @@ public class UserServiceImpl implements UserService {
 		return userDao.getUser(email);
 	}
 
+	@Override
+	public User getUserByAccessToken(String accessToken) {
+		return userDao.getUserByAccessToken(accessToken);
+	}
+
 }

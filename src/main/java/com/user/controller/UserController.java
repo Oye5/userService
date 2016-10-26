@@ -33,6 +33,7 @@ import com.sendgrid.Method;
 import com.sendgrid.Request;
 import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
+import com.user.dto.request.FBLoginRequest;
 import com.user.dto.request.ResetPasswordRequest;
 import com.user.dto.request.UpdateUserProfileRequest;
 import com.user.dto.request.UserLoginRequest;
@@ -46,6 +47,7 @@ import com.user.dto.response.ProductTransactionResponse;
 import com.user.dto.response.SellerResponse;
 import com.user.dto.response.ThumbResponse;
 import com.user.dto.response.UserResponse;
+import com.user.dto.response.UserSignUpResponse;
 import com.user.model.Accounts;
 import com.user.model.FavouriteProducts;
 import com.user.model.Product;
@@ -67,6 +69,10 @@ import com.user.service.UserService;
 import com.user.util.ElasticUtil;
 import com.user.util.SetProductResponse;
 import com.user.util.UploadImage;
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
+import com.restfb.Parameter;
+import com.restfb.Version;
 
 @RestController
 public class UserController {
@@ -111,7 +117,7 @@ public class UserController {
 	 * @return
 	 */
 	@RequestMapping(value = "/user/signup", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<GenericResponse> signup(@RequestBody UserSignupRequest userSignupRequest) {
+	public ResponseEntity<?> signup(@RequestBody UserSignupRequest userSignupRequest) {
 
 		GenericResponse response = new GenericResponse();
 
@@ -151,13 +157,31 @@ public class UserController {
 			account.setUser(user);
 			accountService.createAccount(account);
 			Seller seller = new Seller();
+			seller.setLattitude(userSignupRequest.getLattitude());
+			seller.setLongitude(userSignupRequest.getLongitude());
 			seller.setId(user.getUserId());
 			seller.setUserId(user);
 			seller.setBanned("no");
 			sellerService.saveSeller(seller);
-			response.setCode("S001");
-			response.setMessage("User created succssfully");
-			return new ResponseEntity<GenericResponse>(response, HttpStatus.OK);
+			// prepare response
+			UserSignUpResponse userResponse = new UserSignUpResponse();
+			userResponse.setCity(seller.getCity());
+			userResponse.setCountry_code(seller.getCountryCode());
+			userResponse.setFirst_name(seller.getFirstName());
+			userResponse.setLast_name(seller.getLastName());
+			userResponse.setProfile_pic_url(seller.getProfilePic());
+			userResponse.setStatus(seller.getStatus());
+			userResponse.setZip_code(seller.getZipCode());
+			userResponse.setUserRating(seller.getUserRating());
+			userResponse.setEmail(user.getEmail());
+			userResponse.setUser_id(user.getUserId());
+			userResponse.setUser_name(user.getUserName());
+			userResponse.setLattitude(userSignupRequest.getLattitude());
+			userResponse.setLongitude(userSignupRequest.getLongitude());
+
+			// response.setCode("S001");
+			// response.setMessage("User created succssfully");
+			return new ResponseEntity<UserSignUpResponse>(userResponse, HttpStatus.OK);
 		} catch (org.springframework.dao.DataIntegrityViolationException ex) {
 			ex.printStackTrace();
 			response.setCode("V002");
@@ -222,12 +246,29 @@ public class UserController {
 				accounts.setUser(user);
 				accounts.setProvider_name(userLoginRequest.getProvider_name());
 				result = accountService.updateAccount(accounts);
+				// update seller with gcmID
+				seller.setGcmId(userLoginRequest.getGcmId());
+				sellerService.updateSeller(seller);
+
 				if (result != 0) {
 
 					loginResponse = new LoginResponse();
 					loginResponse.setProviderToken(sb.toString());
 					loginResponse.setUserId(accounts.getUser().getUserId());
 					loginResponse.setUserName(user.getUserName());
+
+					loginResponse.setCity(seller.getCity());
+					loginResponse.setCountry_code(seller.getCountryCode());
+					loginResponse.setFirst_name(seller.getFirstName());
+					loginResponse.setLast_name(seller.getLastName());
+					loginResponse.setProfile_pic_url(seller.getProfilePic());
+					loginResponse.setStatus(seller.getStatus());
+					loginResponse.setZip_code(seller.getZipCode());
+					loginResponse.setUserRating(seller.getUserRating());
+					loginResponse.setEmail(user.getEmail());
+					loginResponse.setLattitude(seller.getLattitude());
+					loginResponse.setLongitude(seller.getLongitude());
+
 				} else {
 					response.setCode("E001");
 					response.setMessage("Account not activted yet");
@@ -286,118 +327,134 @@ public class UserController {
 	 * @param userLoginRequest
 	 * @return
 	 */
-	// @Value("${facebook.app.secret}")
-	// private String APP_SECRET;
-	//
-	// @RequestMapping(value = "/user/facebook/signin", method =
-	// RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, consumes
-	// = MediaType.APPLICATION_JSON_VALUE)
-	// public ResponseEntity<?> facebokkSignin(@RequestParam("access_token")
-	// String accessToken) {
-	// GenericResponse response = new GenericResponse();
-	// LoginResponse loginResponse = new LoginResponse();
-	// try {
-	// FacebookClient facebookClient = new DefaultFacebookClient(accessToken,
-	// "8e2cf44150f2bb506dc14946acdeccb7",
-	// Version.VERSION_2_7);
-	// com.restfb.types.User fbUser = facebookClient.fetchObject("me",
-	// com.restfb.types.User.class,
-	// Parameter.with("fields", "name,id,email,devices"));
-	// User user = userService.getUserByAccessToken(accessToken);
-	// if (user == null) {
-	// User newUser = new User();
-	// if (fbUser.getDevices().size() != 0)
-	// newUser.setAppType(fbUser.getDevices().get(0).toString());
-	// else
-	// newUser.setAppType("not defined");
-	// newUser.setUserId(UUID.randomUUID().toString());
-	// newUser.setUserName(fbUser.getName());
-	// newUser.setEmail(fbUser.getEmail());
-	// newUser.setFbAuthToken(accessToken);
-	// userService.saveUser(newUser);
-	// Accounts account = new Accounts();
-	// account.setAccountId(UUID.randomUUID().toString());
-	// // generate authtoken
-	// String token = UUID.randomUUID().toString();
-	// MessageDigest md = MessageDigest.getInstance("SHA-256");
-	// md.update(token.getBytes());
-	//
-	// byte byteData[] = md.digest();
-	//
-	// // convert the byte to hex format
-	// StringBuffer sb = new StringBuffer();
-	// for (int i = 0; i < byteData.length; i++) {
-	// sb.append(Integer.toString((byteData[i] & 0xff) + 0x100,
-	// 16).substring(1));
-	// }
-	//
-	// // System.out.println("Hex format : " + sb.toString());
-	//
-	// account.setProvider_token(sb.toString());
-	// account.setUserId(newUser);
-	// account.setProvider_name(fbUser.getName());
-	//
-	// accountService.createAccount(account);
-	//
-	// loginResponse = new LoginResponse();
-	// loginResponse.setProviderToken(sb.toString());
-	// loginResponse.setUserId(account.getUserId().getUserId());
-	// loginResponse.setUserName(fbUser.getName());
-	//
-	// return new ResponseEntity<LoginResponse>(loginResponse, HttpStatus.OK);
-	//
-	// } else {
-	// Accounts accounts = new Accounts();
-	// String token = UUID.randomUUID().toString();
-	// MessageDigest md = MessageDigest.getInstance("SHA-256");
-	// md.update(token.getBytes());
-	//
-	// byte byteData[] = md.digest();
-	//
-	// // convert the byte to hex format
-	// StringBuffer sb = new StringBuffer();
-	// for (int i = 0; i < byteData.length; i++) {
-	// sb.append(Integer.toString((byteData[i] & 0xff) + 0x100,
-	// 16).substring(1));
-	// }
-	//
-	// // System.out.println("Hex format : " + sb.toString());
-	//
-	// accounts.setProvider_token(sb.toString());
-	// accounts.setUserId(user);
-	// accounts.setProvider_name(user.getUserName());
-	// int result = accountService.updateAccount(accounts);
-	// // System.out.println("=res11==" + result);
-	// if (result != 0) {
-	//
-	// loginResponse = new LoginResponse();
-	// loginResponse.setProviderToken(sb.toString());
-	// loginResponse.setUserId(accounts.getUserId().getUserId());
-	// loginResponse.setUserName(user.getUserName());
-	// } else {
-	// response.setCode("E002");
-	// response.setMessage("Account not activted yet");
-	//
-	// return new ResponseEntity<GenericResponse>(response,
-	// HttpStatus.BAD_REQUEST);
-	// }
-	// }
-	// System.out.println(fbUser.getBirthday());
-	// System.out.println("==" + fbUser.getBirthdayAsDate() + "==" +
-	// fbUser.getUsername());
-	// // user.getBirthday();
-	// return new ResponseEntity<LoginResponse>(loginResponse, HttpStatus.OK);
-	//
-	// } catch (Exception ex) {
-	// ex.printStackTrace();
-	// response.setCode("E002");
-	// response.setMessage(ex.getMessage());
-	//
-	// return new ResponseEntity<GenericResponse>(response,
-	// HttpStatus.BAD_REQUEST);
-	// }
-	//
-	// }
+	@Value("${facebook.app.secret}")
+	private String APP_SECRET;
+
+	@RequestMapping(value = "/user/facebook/signin", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> facebokkSignin(@RequestBody FBLoginRequest fbLoginRequest) {
+		GenericResponse response = new GenericResponse();
+		LoginResponse loginResponse = new LoginResponse();
+		try {
+			System.out.println("===========================");
+			FacebookClient facebookClient = new DefaultFacebookClient(fbLoginRequest.getFbAuthToken(), APP_SECRET, Version.VERSION_2_7);
+			com.restfb.types.User fbUser = facebookClient.fetchObject("me", com.restfb.types.User.class, Parameter.with("fields", "name,id,email,devices"));
+			User user = userService.getUserByAccessToken(fbLoginRequest.getFbAuthToken());
+
+			if (user == null) {
+				User newUser = new User();
+				if (fbUser.getDevices().size() != 0)
+					newUser.setAppType(fbUser.getDevices().get(0).toString());
+				else
+					newUser.setAppType("not defined");
+				newUser.setUserId(UUID.randomUUID().toString());
+				newUser.setUserName(fbUser.getName());
+				newUser.setEmail(fbUser.getEmail());
+				newUser.setFbAuthToken(fbLoginRequest.getFbAuthToken());
+				userService.saveUser(newUser);
+				Accounts account = new Accounts();
+				account.setAccountId(UUID.randomUUID().toString());
+				// generate authtoken
+				String token = UUID.randomUUID().toString();
+				MessageDigest md = MessageDigest.getInstance("SHA-256");
+				md.update(token.getBytes());
+
+				byte byteData[] = md.digest();
+
+				// convert the byte to hex format
+				StringBuffer sb = new StringBuffer();
+				for (int i = 0; i < byteData.length; i++) {
+					sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
+				}
+
+				// System.out.println("Hex format : " + sb.toString());
+
+				account.setProvider_token(sb.toString());
+				account.setUser(newUser);
+				account.setProvider_name(fbUser.getName());
+
+				accountService.createAccount(account);
+
+				// Seller seller = sellerService.getSellerById(user.getUserId());
+				// if (seller.getBanned().equalsIgnoreCase("banned")) {
+				// response.setCode("V002");
+				// response.setMessage("user banned can't login.");
+				// return new ResponseEntity<GenericResponse>(response, HttpStatus.OK);
+				// }
+				// save seller
+				Seller seller = new Seller();
+				seller.setGcmId(fbLoginRequest.getGcmId());
+				seller.setLattitude(fbLoginRequest.getLattitude());
+				seller.setLongitude(fbLoginRequest.getLongitude());
+				seller.setId(newUser.getUserId());
+				seller.setUserId(newUser);
+				seller.setBanned("no");
+				sellerService.saveSeller(seller);
+
+				loginResponse = new LoginResponse();
+				loginResponse.setProviderToken(sb.toString());
+				loginResponse.setUserId(account.getUser().getUserId());
+				loginResponse.setUserName(fbUser.getName());
+
+				return new ResponseEntity<LoginResponse>(loginResponse, HttpStatus.OK);
+
+			} else {
+
+				Seller seller = sellerService.getSellerById(user.getUserId());
+				if (seller.getBanned().equalsIgnoreCase("banned")) {
+					response.setCode("V002");
+					response.setMessage("user banned can't login.");
+					return new ResponseEntity<GenericResponse>(response, HttpStatus.OK);
+				}
+				// update seller with gcmID
+				seller.setGcmId(fbLoginRequest.getGcmId());
+				sellerService.updateSeller(seller);
+				Accounts accounts = new Accounts();
+				String token = UUID.randomUUID().toString();
+				MessageDigest md = MessageDigest.getInstance("SHA-256");
+				md.update(token.getBytes());
+
+				byte byteData[] = md.digest();
+
+				// convert the byte to hex format
+				StringBuffer sb = new StringBuffer();
+				for (int i = 0; i < byteData.length; i++) {
+					sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
+				}
+
+				// System.out.println("Hex format : " + sb.toString());
+
+				accounts.setProvider_token(sb.toString());
+				accounts.setUser(user);
+				accounts.setProvider_name(user.getUserName());
+				int result = accountService.updateAccount(accounts);
+				// System.out.println("=res11==" + result);
+				if (result != 0) {
+
+					loginResponse = new LoginResponse();
+					loginResponse.setProviderToken(sb.toString());
+					loginResponse.setUserId(accounts.getUser().getUserId());
+					loginResponse.setUserName(user.getUserName());
+				} else {
+					response.setCode("E002");
+					response.setMessage("Account not activted yet");
+
+					return new ResponseEntity<GenericResponse>(response, HttpStatus.BAD_REQUEST);
+				}
+			}
+			System.out.println(fbUser.getBirthday());
+			System.out.println("==" + fbUser.getBirthdayAsDate() + "==" + fbUser.getUsername());
+			// user.getBirthday();
+			return new ResponseEntity<LoginResponse>(loginResponse, HttpStatus.OK);
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			response.setCode("E002");
+			response.setMessage(ex.getMessage());
+
+			return new ResponseEntity<GenericResponse>(response, HttpStatus.BAD_REQUEST);
+		}
+
+	}
 
 	/**
 	 * make product favourite for given user
@@ -616,6 +673,8 @@ public class UserController {
 			seller.setId(userId);
 			seller.setUserId(user);
 			seller.setLastName(userProfileRequest.getLastName());
+			seller.setLattitude(userProfileRequest.getLattitude());
+			seller.setLongitude(userProfileRequest.getLongitude());
 			if (file != null) {
 				String ProfilePicUrl = uploadImage.uploadImage(file, folder);
 				seller.setProfilePic(ProfilePicUrl);
@@ -668,6 +727,8 @@ public class UserController {
 				userResponse.setStatus(seller.getStatus());
 				userResponse.setZip_code(seller.getZipCode());
 				userResponse.setUserRating(seller.getUserRating());
+				userResponse.setLattitude(seller.getLattitude());
+				userResponse.setLongitude(seller.getLongitude());
 			}
 
 			userResponse.setEmail(user.getEmail());
@@ -740,7 +801,9 @@ public class UserController {
 			productTransaction.setProduct(product);
 			User user = new User();
 			user.setUserId(buyerId);
-			productTransaction.setUserId(user);
+			productTransaction.setBuyerUserId(user);
+			productTransaction.setSellerUserId(product.getUser());
+			System.out.println("=========product.gett==" + product.getUser());
 			String result = productTransactionService.saveBuyingDetails(productTransaction);
 			if (result != null) {
 				product.setQuantity(product.getQuantity() - 1);
@@ -898,4 +961,59 @@ public class UserController {
 			return new ResponseEntity<GenericResponse>(response, HttpStatus.BAD_REQUEST);
 		}
 	}
+
+	/**
+	 * user buying product list
+	 * 
+	 * @param userId
+	 * @return
+	 */
+	@RequestMapping(value = "/v1/user/{userid}/buyingproductList", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> userBuyingProductList(@PathVariable("userid") String userId) {
+		GenericResponse response = new GenericResponse();
+		try {
+			User user = userService.getUserById(userId);
+			if (user == null) {
+				response.setCode("V001");
+				response.setMessage("please check user id. userid is not valid");
+				return new ResponseEntity<GenericResponse>(response, HttpStatus.EXPECTATION_FAILED);
+			}
+			List<ProductTransaction> transaction = productTransactionService.getBuyingProductByUserId(userId);
+
+			return new ResponseEntity<List<ProductTransaction>>(transaction, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.setCode("E001");
+			response.setMessage(e.getMessage());
+			return new ResponseEntity<GenericResponse>(response, HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	/**
+	 * user sold product list
+	 * 
+	 * @param userId
+	 * @return
+	 */
+	@RequestMapping(value = "/v1/user/{userid}/soldproductList", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> userSellingProductList(@PathVariable("userid") String userId) {
+		GenericResponse response = new GenericResponse();
+		try {
+			User user = userService.getUserById(userId);
+			if (user == null) {
+				response.setCode("V001");
+				response.setMessage("please check user id. userid is not valid");
+				return new ResponseEntity<GenericResponse>(response, HttpStatus.EXPECTATION_FAILED);
+			}
+			List<ProductTransaction> transaction = productTransactionService.getSoldProductByUserId(userId);
+
+			return new ResponseEntity<List<ProductTransaction>>(transaction, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.setCode("E001");
+			response.setMessage(e.getMessage());
+			return new ResponseEntity<GenericResponse>(response, HttpStatus.BAD_REQUEST);
+		}
+	}
+
 }

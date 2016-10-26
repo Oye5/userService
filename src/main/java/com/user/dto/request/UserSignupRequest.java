@@ -11,6 +11,10 @@ public class UserSignupRequest {
 
 	private String password;
 
+	private double lattitude;
+
+	private double longitude;
+
 	public String getId() {
 		return id;
 	}
@@ -31,6 +35,14 @@ public class UserSignupRequest {
 		return password;
 	}
 
+	public double getLattitude() {
+		return lattitude;
+	}
+
+	public double getLongitude() {
+		return longitude;
+	}
+
 	public void setId(String id) {
 		this.id = id;
 	}
@@ -49,6 +61,14 @@ public class UserSignupRequest {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public void setLattitude(double lattitude) {
+		this.lattitude = lattitude;
+	}
+
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
 	}
 
 }

@@ -8,6 +8,8 @@ public class UserLoginRequest {
 
 	private String password;
 
+	private String gcmId;
+
 	public String getEmail() {
 		return email;
 	}
@@ -30,6 +32,14 @@ public class UserLoginRequest {
 
 	public void setProvider_name(String provider_name) {
 		this.provider_name = provider_name;
+	}
+
+	public String getGcmId() {
+		return gcmId;
+	}
+
+	public void setGcmId(String gcmId) {
+		this.gcmId = gcmId;
 	}
 
 }

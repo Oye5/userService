@@ -1,5 +1,7 @@
 package com.user.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,16 @@ public class ProductTransactionServiceImpl implements ProductTransactionService 
 	public void deleteProductTransaction(String productId) {
 		transactionDao.deleteProductTransaction(productId);
 
+	}
+
+	@Override
+	public List<ProductTransaction> getBuyingProductByUserId(String userId) {
+		return transactionDao.getBuyingProductByUserId(userId);
+	}
+
+	@Override
+	public List<ProductTransaction> getSoldProductByUserId(String userId) {
+		return transactionDao.getSoldProductByUserId(userId);
 	}
 
 }

@@ -54,6 +54,9 @@ public class User implements Serializable {
 	@Column(name = "generated_otp")
 	private long otp;
 
+	@Column(name = "fb_auth_token", length = 300)
+	private String fbAuthToken;
+
 	public String getUserId() {
 		return userId;
 	}
@@ -146,6 +149,14 @@ public class User implements Serializable {
 
 	public void setOtp(long otp) {
 		this.otp = otp;
+	}
+
+	public String getFbAuthToken() {
+		return fbAuthToken;
+	}
+
+	public void setFbAuthToken(String fbAuthToken) {
+		this.fbAuthToken = fbAuthToken;
 	}
 
 }

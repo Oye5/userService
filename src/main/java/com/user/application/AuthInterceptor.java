@@ -35,6 +35,8 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 			return true;
 		} else if (httpRequest.getRequestURI().contains("/userservice/user/signin")) {
 			return true;
+		} else if (httpRequest.getRequestURI().contains("/user/facebook/signin")) {
+			return true;
 		} else if (httpRequest.getRequestURI().contains("/userservice/v1/user/forgetpassword")) {
 			return true;
 		} else if (httpRequest.getRequestURI().contains("/userservice/v1/user/resetpassword")) {

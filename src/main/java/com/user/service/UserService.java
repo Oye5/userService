@@ -17,4 +17,5 @@ public interface UserService {
 
 	User getUser(String email);
 
+	User getUserByAccessToken(String accessToken);
 }
