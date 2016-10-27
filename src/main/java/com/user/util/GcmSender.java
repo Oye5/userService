@@ -15,7 +15,6 @@ public class GcmSender {
 		System.out.println("===================1===");
 		MulticastResult result = null;
 		try {
-			// System.out.println("********GCM Class ************" + regId.size());
 			Sender sender = new Sender(GCM_API_KEY);
 			ArrayList<String> devicesList = new ArrayList<String>();
 			devicesList.add("APA91bEBegIZpKZwmtQAbECdbsfYz1G1I_pGMKhwieDIl6hv1qat5-oywuBClki0eSiWqgJzaA3bhZw4sikqKdvkzh62Yb4zuHHyQ4okldGpdiluzK2q0sOFGpfINmbqcvNy-o200NX2");

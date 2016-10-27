@@ -675,6 +675,7 @@ public class UserController {
 			seller.setLastName(userProfileRequest.getLastName());
 			seller.setLattitude(userProfileRequest.getLattitude());
 			seller.setLongitude(userProfileRequest.getLongitude());
+			seller.setBanned("no");
 			if (file != null) {
 				String ProfilePicUrl = uploadImage.uploadImage(file, folder);
 				seller.setProfilePic(ProfilePicUrl);
