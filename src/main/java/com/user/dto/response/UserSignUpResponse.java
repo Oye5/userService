@@ -2,6 +2,7 @@ package com.user.dto.response;
 
 public class UserSignUpResponse {
 	private String user_id;
+	private String providerToken;
 	private String user_name;
 	private String first_name;
 	private String last_name;
@@ -117,6 +118,14 @@ public class UserSignUpResponse {
 
 	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
+	}
+
+	public String getProviderToken() {
+		return providerToken;
+	}
+
+	public void setProviderToken(String providerToken) {
+		this.providerToken = providerToken;
 	}
 
 }

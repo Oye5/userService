@@ -155,6 +155,23 @@ public class UserController {
 			account.setAccountId(UUID.randomUUID().toString());
 			account.setProvider_name(userSignupRequest.getUsername());
 			account.setUser(user);
+
+			String token = UUID.randomUUID().toString();
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			md.update(token.getBytes());
+
+			byte byteData[] = md.digest();
+
+			// convert the byte to hex format
+			StringBuffer sb = new StringBuffer();
+			for (int i = 0; i < byteData.length; i++) {
+				sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
+			}
+
+			// System.out.println("Hex format : " + sb.toString());
+
+			account.setProvider_token(sb.toString());
+
 			accountService.createAccount(account);
 			Seller seller = new Seller();
 			seller.setLattitude(userSignupRequest.getLattitude());
@@ -178,7 +195,7 @@ public class UserController {
 			userResponse.setUser_name(user.getUserName());
 			userResponse.setLattitude(userSignupRequest.getLattitude());
 			userResponse.setLongitude(userSignupRequest.getLongitude());
-
+			userResponse.setProviderToken(account.getProvider_token());
 			// response.setCode("S001");
 			// response.setMessage("User created succssfully");
 			return new ResponseEntity<UserSignUpResponse>(userResponse, HttpStatus.OK);
