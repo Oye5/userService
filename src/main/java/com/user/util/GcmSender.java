@@ -8,7 +8,7 @@ import com.google.android.gcm.server.Sender;
 
 public class GcmSender {
 
-	public static final String GCM_API_KEY = "AIzaSyDDC0VG3t9fv6dbhQxJhscrZ19uZCsg6oI";// "AIzaSyB7k-NYr1JfE8FKxJvVJo5Jyseb4_XbaiM";
+	public static final String GCM_API_KEY =  "AIzaSyB7k-NYr1JfE8FKxJvVJo5Jyseb4_XbaiM";
 	public static final String MESSAGE_KEY = "message";
 
 	public void SenderMsg() {
